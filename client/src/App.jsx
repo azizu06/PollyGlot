@@ -1,6 +1,20 @@
 import { useState } from "react";
+import parrot from "./assets/figma/parrot.png";
+import worldMap from "./assets/figma/world-map.svg";
+import worldMapMask from "./assets/figma/world-map-mask.svg";
+import frFlag from "./assets/figma/fr-flag.png";
+import spFlag from "./assets/figma/sp-flag.png";
+import jpnFlag from "./assets/figma/jpn-flag.png";
+import sendIcon from "./assets/figma/send-btn.svg";
+
+const languages = [
+  { value: "French", label: "French", flag: frFlag },
+  { value: "Spanish", label: "Spanish", flag: spFlag },
+  { value: "Japanese", label: "Japanese", flag: jpnFlag },
+];
+
 export default function App() {
-  const [lang, setLang] = useState("");
+  const [lang, setLang] = useState("French");
   const [draft, setDraft] = useState("");
   const [chat, setChat] = useState([
     {
@@ -8,11 +22,23 @@ export default function App() {
       content:
         "Select the language you want me to translate into, type your text and hit send!",
     },
+    {
+      role: "user",
+      content: "How are you?",
+    },
+    {
+      role: "assistant",
+      content: "Comment allez-vous?",
+    },
   ]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setChat((prev) => [...prev, { role: "user", content: draft }]);
+    const userInput = draft.trim();
+    if (!userInput) return;
+
+    setChat((prev) => [...prev, { role: "user", content: userInput }]);
+    setDraft("");
     try {
       const response = await fetch("http://localhost:3000/api/translate", {
         method: "POST",
@@ -20,7 +46,7 @@ export default function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userInput: draft.trim(),
+          userInput,
           language: lang,
         }),
       });
@@ -30,7 +56,6 @@ export default function App() {
         ...prev,
         { role: "assistant", content: data.message },
       ]);
-      setDraft("");
     } catch {
       setChat((prev) => [
         ...prev,
@@ -41,79 +66,78 @@ export default function App() {
       ]);
     }
   };
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex gap-2 justify-center">
-        <img src="#" alt="" />
-        <div className="flex flex-col gap-1">
-          <h1>PollyGlot</h1>
-          <p>Perfect translation every time</p>
+    <main className="app-shell">
+      <header className="hero">
+        <div
+          className="world-map"
+          style={{
+            WebkitMaskImage: `url(${worldMapMask})`,
+            maskImage: `url(${worldMapMask})`,
+          }}
+        >
+          <img src={worldMap} alt="" />
         </div>
-      </div>
-      <div className="flex flex-col gap-2 border rounded-lg w-10/12 justify-center  mx-auto">
-        <div className="flex flex-col gap-1">
+        <div className="brand">
+          <img className="parrot" src={parrot} alt="" />
+          <div className="brand-copy">
+            <h1>PollyGlot</h1>
+            <p>Perfect Translation Every Time</p>
+          </div>
+        </div>
+      </header>
+
+      <section className="translator-card" aria-label="Translation chat">
+        <div className="messages" aria-live="polite">
           {chat.map((c, i) => (
             <div
               key={i}
-              className={`flex border p-1 rounded-b-lg ${c.role === "user" ? "bg-green-500 text-black rounded-r-lg" : "bg-blue-500 text-white rounded-l-lg"}`}
+              className={`message ${c.role === "user" ? "message-user" : "message-assistant"}`}
             >
               {c.content}
             </div>
           ))}
         </div>
-        <form className="flex flex-col gap-2 " onSubmit={handleSubmit}>
-          <label htmlFor="translate" className="flex border rounded-lg">
+
+        <form className="composer" onSubmit={handleSubmit}>
+          <label htmlFor="translate" className="input-row">
+            <span className="sr-only">Text to translate</span>
             <input
               type="text"
               name="translate"
-              className="flex grow pl-1"
+              id="translate"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               required
             />
-            <button type="submit" className="cursor-pointer">
-              <img src="#" alt="send" />
-              Send
+            <button type="submit" className="send-button" aria-label="Send">
+              <img src={sendIcon} alt="" />
             </button>
           </label>
-          <div className="flex justify-center gap-16">
-            <label htmlFor="lang-french">
-              <input
-                type="radio"
-                value="French"
-                checked={lang === "French"}
-                name="lang"
-                id="lang-french"
-                onChange={(e) => setLang(e.target.value)}
-                required
-              />
-              French
-            </label>
-            <label htmlFor="lang-spanish">
-              <input
-                type="radio"
-                value="Spanish"
-                checked={lang === "Spanish"}
-                name="lang"
-                id="lang-spanish"
-                onChange={(e) => setLang(e.target.value)}
-              />
-              Spanish
-            </label>
-            <label htmlFor="lang-japanese">
-              <input
-                type="radio"
-                value="Japanese"
-                checked={lang === "Japanese"}
-                name="lang"
-                id="lang-japanese"
-                onChange={(e) => setLang(e.target.value)}
-              />
-              Japanese
-            </label>
+
+          <div className="language-options" aria-label="Translation language">
+            {languages.map((language) => (
+              <label
+                className={`flag-option ${lang === language.value ? "selected" : ""}`}
+                htmlFor={`lang-${language.value.toLowerCase()}`}
+                key={language.value}
+              >
+                <input
+                  type="radio"
+                  value={language.value}
+                  checked={lang === language.value}
+                  name="lang"
+                  id={`lang-${language.value.toLowerCase()}`}
+                  onChange={(e) => setLang(e.target.value)}
+                  required
+                />
+                <img src={language.flag} alt={language.label} />
+              </label>
+            ))}
           </div>
         </form>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
