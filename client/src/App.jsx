@@ -6,7 +6,7 @@ export default function App() {
     {
       role: "assistant",
       content:
-        "Select the language you me to translate into, type your text and hit send!",
+        "Select the language you want me to translate into, type your text and hit send!",
     },
   ]);
 
@@ -20,15 +20,17 @@ export default function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userInput: draft,
+          userInput: draft.trim(),
           language: lang,
         }),
       });
+      if (!response.ok) throw Error("Failed to translate");
       const data = await response.json();
       setChat((prev) => [
         ...prev,
         { role: "assistant", content: data.message },
       ]);
+      setDraft("");
     } catch {
       setChat((prev) => [
         ...prev,
@@ -41,14 +43,14 @@ export default function App() {
   };
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2">
+      <div className="flex gap-2 justify-center">
         <img src="#" alt="" />
         <div className="flex flex-col gap-1">
           <h1>PollyGlot</h1>
           <p>Perfect translation every time</p>
         </div>
       </div>
-      <div className="flex flex-col gap-2 border rounded-lg">
+      <div className="flex flex-col gap-2 border rounded-lg w-10/12 justify-center  mx-auto">
         <div className="flex flex-col gap-1">
           {chat.map((c, i) => (
             <div
@@ -59,7 +61,7 @@ export default function App() {
             </div>
           ))}
         </div>
-        <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-2 " onSubmit={handleSubmit}>
           <label htmlFor="translate" className="flex border rounded-lg">
             <input
               type="text"
@@ -69,42 +71,47 @@ export default function App() {
               onChange={(e) => setDraft(e.target.value)}
               required
             />
-            <button type="submit">
+            <button type="submit" className="cursor-pointer">
               <img src="#" alt="send" />
               Send
             </button>
           </label>
-          <label htmlFor="lang">
-            <input
-              type="radio"
-              value="French"
-              checked={lang === "French"}
-              name="lang"
-              onChange={(e) => setLang(e.target.value)}
-              required
-            />
-            French
-          </label>
-          <label htmlFor="lang">
-            <input
-              type="radio"
-              value="Spanish"
-              checked={lang === "Spanish"}
-              name="lang"
-              onChange={(e) => setLang(e.target.value)}
-            />
-            Spanish
-          </label>
-          <label htmlFor="lang">
-            <input
-              type="radio"
-              value="Japanese"
-              checked={lang === "Japanese"}
-              name="lang"
-              onChange={(e) => setLang(e.target.value)}
-            />
-            Japanese
-          </label>
+          <div className="flex justify-center gap-16">
+            <label htmlFor="lang-french">
+              <input
+                type="radio"
+                value="French"
+                checked={lang === "French"}
+                name="lang"
+                id="lang-french"
+                onChange={(e) => setLang(e.target.value)}
+                required
+              />
+              French
+            </label>
+            <label htmlFor="lang-spanish">
+              <input
+                type="radio"
+                value="Spanish"
+                checked={lang === "Spanish"}
+                name="lang"
+                id="lang-spanish"
+                onChange={(e) => setLang(e.target.value)}
+              />
+              Spanish
+            </label>
+            <label htmlFor="lang-japanese">
+              <input
+                type="radio"
+                value="Japanese"
+                checked={lang === "Japanese"}
+                name="lang"
+                id="lang-japanese"
+                onChange={(e) => setLang(e.target.value)}
+              />
+              Japanese
+            </label>
+          </div>
         </form>
       </div>
     </div>
