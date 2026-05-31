@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import parrot from "./assets/figma/parrot.png";
 import worldMap from "./assets/figma/world-map.svg";
 import worldMapMask from "./assets/figma/world-map-mask.svg";
@@ -16,6 +16,8 @@ const languages = [
 export default function App() {
   const [lang, setLang] = useState("French");
   const [draft, setDraft] = useState("");
+  const messagesRef = useRef(null);
+  const textareaRef = useRef(null);
   const [chat, setChat] = useState([
     {
       role: "assistant",
@@ -31,6 +33,20 @@ export default function App() {
       content: "Comment allez-vous?",
     },
   ]);
+
+  useEffect(() => {
+    const messages = messagesRef.current;
+    if (!messages) return;
+    messages.scrollTop = messages.scrollHeight;
+  }, [chat]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const maxHeight = Number.parseFloat(getComputedStyle(textarea).maxHeight);
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+  }, [draft]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,6 +83,12 @@ export default function App() {
     }
   };
 
+  const handleDraftKeyDown = (e) => {
+    if (e.key !== "Enter" || e.shiftKey) return;
+    e.preventDefault();
+    e.currentTarget.form.requestSubmit();
+  };
+
   return (
     <main className="app-shell">
       <header className="hero">
@@ -89,7 +111,7 @@ export default function App() {
       </header>
 
       <section className="translator-card" aria-label="Translation chat">
-        <div className="messages" aria-live="polite">
+        <div className="messages" aria-live="polite" ref={messagesRef}>
           {chat.map((c, i) => (
             <div
               key={i}
@@ -103,12 +125,14 @@ export default function App() {
         <form className="composer" onSubmit={handleSubmit}>
           <label htmlFor="translate" className="input-row">
             <span className="sr-only">Text to translate</span>
-            <input
-              type="text"
+            <textarea
               name="translate"
               id="translate"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={handleDraftKeyDown}
+              ref={textareaRef}
+              rows="1"
               required
             />
             <button type="submit" className="send-button" aria-label="Send">
