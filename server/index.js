@@ -47,6 +47,7 @@ const rateLimitWindowMs = Number(
 );
 const dailyRequestLimit = Number(process.env.DAILY_TRANSLATION_LIMIT || 15);
 const maxOutputTokens = Number(process.env.OPENAI_MAX_OUTPUT_TOKENS || 200);
+const reasoningEffort = process.env.OPENAI_REASONING_EFFORT || "minimal";
 
 let dailyUsage = {
   day: new Date().toISOString().slice(0, 10),
@@ -118,8 +119,16 @@ app.post("/api/translate", translationLimiter, async (req, res) => {
       model: process.env.OPENAI_MODEL,
       instructions,
       input,
+      reasoning: { effort: reasoningEffort },
       max_output_tokens: maxOutputTokens,
     });
+    if (!response.output_text) {
+      console.error("OpenAI response did not include output text", {
+        status: response.status,
+        incomplete_details: response.incomplete_details,
+      });
+      return res.status(502).json({ error: "Request failed" });
+    }
     dailyUsage.count += 1;
     res.json({ message: response.output_text });
   } catch (err) {
