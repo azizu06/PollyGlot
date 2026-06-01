@@ -56,7 +56,7 @@ export default function App() {
     setChat((prev) => [...prev, { role: "user", content: userInput }]);
     setDraft("");
     try {
-      const response = await fetch("http://localhost:3000/api/translate", {
+      const response = await fetch("/api/translate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

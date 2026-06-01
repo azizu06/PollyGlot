@@ -2,7 +2,7 @@
 
 PollyGlot is a small AI-powered translation chat app built as an OpenAI API integration project. It lets a user choose a target language, enter text, and receive a translated response in a styled chat interface.
 
-The app is intentionally previewed with screenshots instead of a public live deployment because it depends on a server-side API key. Keeping it local avoids exposing an endpoint that could be spammed or abused.
+The app keeps API credentials on the server and adds strict request limits around the public translation endpoint.
 
 ## Preview
 
@@ -37,66 +37,71 @@ PollyGlot/
 
 ## Local Setup
 
-Clone the repository, then install dependencies in both app folders:
+Clone the repository, then install dependencies and build from the repo root:
 
 ```bash
-cd client
 npm install
-
-cd ../server
-npm install
+npm run build
 ```
 
 Create a `.env` file inside `server/`:
 
 ```bash
-AI_URL=your_openai_compatible_base_url
-AI_KEY=your_api_key
-AI_MODEL=your_model_name
+OPEN_AI_URL=your_openai_compatible_base_url
+OPEN_AI_KEY=your_api_key
+OPEN_AI_MODEL=your_model_name
 PORT=3000
+
+# Optional strict public-use controls
+ALLOWED_ORIGINS=https://your-render-service.onrender.com
+MAX_INPUT_CHARS=400
+RATE_LIMIT_MAX=5
+RATE_LIMIT_WINDOW_MS=900000
+DAILY_TRANSLATION_LIMIT=30
+OPEN_AI_MAX_OUTPUT_TOKENS=300
 ```
 
-Start the backend:
+Start the app:
 
 ```bash
-cd server
 npm start
 ```
 
-Start the frontend in a second terminal:
-
-```bash
-cd client
-npm run dev
-```
-
-Then open the local Vite URL, usually:
+Then open:
 
 ```text
-http://127.0.0.1:5173/
+http://localhost:3000/
+```
+
+For frontend development with Vite, run the client in a second terminal:
+
+```bash
+npm run dev --prefix client
 ```
 
 ## Scripts
 
+Root:
+
+```bash
+npm run build
+npm start
+```
+
 Frontend:
 
 ```bash
-cd client
-npm run dev
-npm run build
-npm run lint
-```
-
-Backend:
-
-```bash
-cd server
-npm start
-npm run dev
+npm run dev --prefix client
+npm run lint --prefix client
 ```
 
 ## Notes
 
-There is no public demo link by design. The project uses an API-backed translation route, and deploying it publicly without authentication or rate limiting would make the API key-backed endpoint easy to abuse.
+For Render, deploy this repository as one Node web service from the repository root:
 
-For review purposes, the screenshot above serves as the project preview.
+```text
+Build Command: npm run build
+Start Command: npm start
+```
+
+Set the OpenAI environment variables in Render, and keep the strict limit variables low for public demos.
