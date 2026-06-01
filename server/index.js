@@ -9,8 +9,8 @@ app.use(cors());
 app.use(express.json());
 
 const openai = new OpenAI({
-  baseURL: process.env.AI_URL,
-  apiKey: process.env.AI_KEY,
+  baseURL: process.env.OPEN_AI_URL,
+  apiKey: process.env.OPEN_AI_KEY,
 });
 const instructions = `
 You are a precise translation assistant for a multilingual chat app.
@@ -33,7 +33,7 @@ app.post("/api/translate", async (req, res) => {
       return res.status(400).json({ error: "Request failed" });
     const input = `Translate to ${language}: ${userInput}`;
     const response = await openai.responses.create({
-      model: process.env.AI_MODEL,
+      model: process.env.OPEN_AI_MODEL,
       instructions,
       input,
     });
