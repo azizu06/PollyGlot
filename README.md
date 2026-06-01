@@ -47,9 +47,9 @@ npm run build
 Create a `.env` file inside `server/`:
 
 ```bash
-OPEN_AI_URL=your_openai_compatible_base_url
-OPEN_AI_KEY=your_api_key
-OPEN_AI_MODEL=your_model_name
+OPENAI_API_KEY=your_api_key
+OPENAI_URL=your_openai_compatible_base_url
+OPENAI_MODEL=your_model_name
 PORT=3000
 
 # Optional strict public-use controls
@@ -58,7 +58,7 @@ MAX_INPUT_CHARS=400
 RATE_LIMIT_MAX=5
 RATE_LIMIT_WINDOW_MS=900000
 DAILY_TRANSLATION_LIMIT=30
-OPEN_AI_MAX_OUTPUT_TOKENS=300
+OPENAI_MAX_OUTPUT_TOKENS=300
 ```
 
 Start the app:

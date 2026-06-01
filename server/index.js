@@ -46,7 +46,7 @@ const rateLimitWindowMs = Number(
   process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
 );
 const dailyRequestLimit = Number(process.env.DAILY_TRANSLATION_LIMIT || 15);
-const maxOutputTokens = Number(process.env.OPEN_AI_MAX_OUTPUT_TOKENS || 200);
+const maxOutputTokens = Number(process.env.OPENAI_MAX_OUTPUT_TOKENS || 200);
 
 let dailyUsage = {
   day: new Date().toISOString().slice(0, 10),
@@ -69,8 +69,8 @@ const translationLimiter = rateLimit({
 });
 
 const openai = new OpenAI({
-  baseURL: process.env.OPEN_AI_URL,
-  apiKey: process.env.OPEN_AI_KEY,
+  baseURL: process.env.OPENAI_URL,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 const instructions = `
 You are a precise translation assistant for a multilingual chat app.
@@ -115,7 +115,7 @@ app.post("/api/translate", translationLimiter, async (req, res) => {
 
     const input = `Translate to ${language}: ${userInput}`;
     const response = await openai.responses.create({
-      model: process.env.OPEN_AI_MODEL,
+      model: process.env.OPENAI_MODEL,
       instructions,
       input,
       max_output_tokens: maxOutputTokens,
